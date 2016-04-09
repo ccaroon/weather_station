@@ -3,7 +3,7 @@
 // Initialize
 WeatherShield::WeatherShield() {}
 
-void WeatherShield::begin(void) {
+void WeatherShield::begin(byte oversample) {
   Wire.begin();
 
   uint8_t ID_Barro = IICRead(WHO_AM_I);
@@ -45,10 +45,99 @@ void WeatherShield::begin(void) {
   // } else {
   //   Serial.println("No Devices Detected");
   // }
+
+  // input from windspeed sensor
+  pinMode(WIND_SPEED, INPUT_PULLUP);
+
+  // input from rain gauge sensor
+  pinMode(RAIN, INPUT_PULLUP);
+
+  // Set Oversample rate
+  // Call with a rate from 0 to 7. See page 33 for table of ratios.
+  // Sets the over sample rate. Datasheet calls for 128 but you can set it
+  // from 1 to 128 samples. The higher the oversample rate the greater
+  // the time between data samples.
+  setOversampleRate(oversample);
+
+  // Necessary register calls to enble temp, baro and alt
+  enableEventFlags();
+}
+
+void WeatherShield::update() {
+  seconds += updateInterval;
+  if (seconds > 59) {
+    seconds = 0;
+
+    if (++minutes > 59) {
+      minutes = 0;
+    }
+
+    // Zero out this minute's rainfall amount
+    data.rainByMinute[minutes] = 0;
+    data.windSpeedMax = 0.0;
+  }
+
+  data.rainPerHour = 0;
+  for (int i = 0; i < 60; i++)
+    data.rainPerHour += data.rainByMinute[i];
+}
+
+WeatherData *WeatherShield::getWeather() {
+  // Measure Relative Humidity from the HTU21D or Si7021
+  data.humidity = getRH();
+
+  // Measure Temperature from the HTU21D or Si7021
+  // Temperature is measured every time RH is requested.
+  // It is faster, therefore, to read it from previous RH
+  // measurement with getTemp() instead with readTemp()
+  data.tempF = getTempF();
+
+  // TODO: make these private
+  readBarometer();
+  readAltimeter();
+
+  // Calc windDirection
+  data.windDirection = getWindDirection();
+
+  // Calc windspeed
+  data.windSpeedMPH = getWindSpeed();
+
+  // Avg Wind
+  data.windSpeedMeasurements[seconds] = data.windSpeedMPH;
+
+  for (byte i = 0; i < 100; i++) {
+    data.windSpeedAvg += data.windSpeedMeasurements[i];
+  }
+  data.windSpeedAvg /= 100;
+
+  // Max Wind
+  if (data.windSpeedMPH > data.windSpeedMax) {
+    data.windSpeedMax = data.windSpeedMPH;
+  }
+
+  update();
+
+  return &data;
+}
+
+/*
+You can only receive accurate barometric readings or accurate altitude
+readings at a given time, not both at the same time.
+*/
+//------------------------------------------------------------------------------
+// Measure pressure and temperature from MPL3115A2
+void WeatherShield::readBarometer() {
+  setModeBarometer();
+  data.baroTempF = readBaroTempF();
+  data.pressurePa = readPressure();
+}
+//------------------------------------------------------------------------------
+void WeatherShield::readAltimeter() {
+  setModeAltimeter();
+  data.altFeet = readAltitudeFt();
 }
 
 // Si7021 & HTU21D* Functions
-
 float WeatherShield::getRH() {
   // Measure the relative humidity
   uint16_t RH_Code = makeMeasurment(HUMD_MEASURE_NOHOLD);
@@ -58,15 +147,15 @@ float WeatherShield::getRH() {
 
 float WeatherShield::readTemp() {
   // Read temperature from previous RH measurement.
-  uint16_t temp_Code = makeMeasurment(TEMP_PREV);
-  float result = (175.25 * temp_Code / 65536) - 46.85;
+  uint16_t tempCode = makeMeasurment(TEMP_PREV);
+  float result = (175.25 * tempCode / 65536) - 46.85;
   return result;
 }
 
 float WeatherShield::getTemp() {
   // Measure temperature
-  uint16_t temp_Code = makeMeasurment(TEMP_MEASURE_NOHOLD);
-  float result = (175.25 * temp_Code / 65536) - 46.85;
+  uint16_t tempCode = makeMeasurment(TEMP_MEASURE_NOHOLD);
+  float result = (175.25 * tempCode / 65536) - 46.85;
   return result;
 }
 // Give me temperature in fahrenheit!
@@ -542,3 +631,26 @@ float WeatherShield::getWindSpeed() {
 
   return (windSpeed);
 }
+
+// Count rain gauge bucket tips as they occur
+// Activated by the magnet and reed switch in the rain gauge, attached to input
+// D2
+void WeatherShield::rainIRQ() {
+  unsigned long now = millis();
+
+  // ignore switch-bounce glitches less than 10mS after initial edge
+  if (now - rainLastMeasure > 10) {
+    // Each dump is RAIN_PER_DUMP of water
+    // TODO: where/when does this zero out?
+    data.rainPerDay += RAIN_PER_DUMP;
+
+    // Increase this minute's amount of rain
+    data.rainByMinute[minutes] += RAIN_PER_DUMP;
+
+    rainLastMeasure = now;
+  }
+}
+
+float WeatherShield::getRainPerMinute() { return data.rainByMinute[minutes]; }
+float WeatherShield::getRainPerHour() { return data.rainPerHour; }
+float WeatherShield::getRainPerDay() { return data.rainPerDay; }

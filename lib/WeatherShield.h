@@ -79,15 +79,39 @@
 
 // Wind and Rain
 #define WIND_DIR A0
-#define RAIN D2
 #define WIND_SPEED D3
+
+#define RAIN D2
+#define RAIN_PER_DUMP 0.011
+
+struct WeatherData {
+  // Temp, Humidity, etc.
+  double humidity = 0.0;
+  double tempF = 0.0;
+  double pressurePa = 0.0;
+  double baroTempF = 0.0;
+  float altFeet = 0.0;
+
+  // Wind
+  int windDirection = 0;            // 0-360 instantaneous wind direction
+  float windSpeedMPH = 0.0;         // MPH instantaneous wind speed
+  float windSpeedAvg = 0.0;         // Average wind speed over 100 measurements
+  float windSpeedMeasurements[100]; // Last 100 wind speed measurements
+  float windSpeedMax = 0.0;         // Max wind speed per minute
+
+  // Rain
+  float rainByMinute[60];
+  float rainPerHour = 0.0;
+  float rainPerDay = 0.0;
+};
 
 class WeatherShield {
 public:
   // Constructor
   WeatherShield();
 
-  void begin();
+  void begin(byte);
+  void update();
 
   // Si7021 & HTU21D Public Functions
   float getRH();
@@ -125,15 +149,37 @@ public:
   // Sets the fundamental event flags. Required during setup.
   void enableEventFlags();
 
+  void readBarometer();
+  void readAltimeter();
+
+  // Wind
   void windSpeedIRQ();
   int getWindDirection();
   float getWindSpeed();
   static char *windDirToCompasPoint(int);
 
+  // Rain
+  float getRainPerMinute();
+  float getRainPerHour();
+  float getRainPerDay();
+  void rainIRQ();
+
+  WeatherData *getWeather();
+
 private:
+  int updateInterval = 1; // in seconds
+  unsigned long seconds;
+  unsigned long minutes;
+
+  // Wind Measurement Vars
   long lastWindCheck = 0;
   volatile long lastWindIRQ = 0;
   volatile byte windClicks = 0;
+
+  // Rain Measurement Vars
+  volatile unsigned long rainLastMeasure;
+
+  WeatherData data;
 
   uint16_t makeMeasurment(uint8_t command);
   // Si7021 & HTU21D Private Functions
