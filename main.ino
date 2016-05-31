@@ -4,7 +4,7 @@
 #define UPDATE_INTERVAL 5 // in seconds
 
 // Blynk Setup
-char auth[] = "507a6402f7f44ba68919f42e2d38cc65";
+char auth[] = "24714b31d1d5415aab822e75614c7595";
 
 double uptime = 0.0;
 char uptimeUnit = 's';
@@ -34,16 +34,21 @@ void setup() {
 
   // turn on interrupts
   interrupts();
+
+  pinMode(D7, OUTPUT);
+  digitalWrite(D7, LOW);
 }
 //---------------------------------------------------------------
 void loop() {
-
-  // TODO: move this function to the WeatherShield class
-  WeatherData *data = shield.getWeather();
   Blynk.run();
 
   // Publishes every UPDATE_INTERVAL seconds
   if (millis() - lastPublish > UPDATE_INTERVAL * 1000) {
+    digitalWrite(D7, HIGH);
+
+    // Get Weather
+    WeatherData *data = shield.getWeather();
+
     // Record when you published
     lastPublish = millis();
 
@@ -79,5 +84,9 @@ void loop() {
     char uptimeString[10];
     sprintf(uptimeString, "%.1f%c", uptime, uptimeUnit);
     Blynk.virtualWrite(10, uptimeString);
+
+    Blynk.virtualWrite(11, data->rainPerHour);
+
+    digitalWrite(D7, LOW);
   }
 }
