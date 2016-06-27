@@ -110,7 +110,7 @@ public:
   // Constructor
   WeatherShield();
 
-  void begin(byte);
+  void begin(byte, bool);
   void update();
 
   // Si7021 & HTU21D Public Functions
@@ -180,6 +180,8 @@ private:
   volatile unsigned long rainLastMeasure;
 
   WeatherData data;
+
+  void registerParticleVars();
 
   uint16_t makeMeasurment(uint8_t command);
   // Si7021 & HTU21D Private Functions

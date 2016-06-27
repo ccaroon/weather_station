@@ -3,7 +3,7 @@
 // Initialize
 WeatherShield::WeatherShield() {}
 
-void WeatherShield::begin(byte oversample) {
+void WeatherShield::begin(byte oversample, bool regParticleVars = false) {
   Wire.begin();
 
   uint8_t ID_Barro = IICRead(WHO_AM_I);
@@ -61,6 +61,14 @@ void WeatherShield::begin(byte oversample) {
 
   // Necessary register calls to enble temp, baro and alt
   enableEventFlags();
+
+  if (regParticleVars) {
+    registerParticleVars();
+  }
+}
+
+void WeatherShield::registerParticleVars() {
+  Particle.variable("tempF", data.tempF);
 }
 
 void WeatherShield::update() {
@@ -92,9 +100,9 @@ WeatherData *WeatherShield::getWeather() {
   // measurement with getTemp() instead with readTemp()
   data.tempF = getTempF();
 
-  // TODO: make these private
+  // TODO: make these private?
   readBarometer();
-  readAltimeter();
+  // readAltimeter();
 
   // Calc windDirection
   data.windDirection = getWindDirection();

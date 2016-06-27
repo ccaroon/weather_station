@@ -10,3 +10,7 @@ Code pieced together from various other sources including tutorial and sample
 code found on the SparkFun website.
 
 Source citations coming soon...
+
+----------
+
+curl https://api.particle.io/v1/devices/DEVICE_ID/tempF?access_token=ACCESS_TOKEN

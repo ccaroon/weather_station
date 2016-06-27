@@ -25,7 +25,7 @@ void setup() {
   // Particle.variable("humidity", humidity);
 
   // Initialize the WeatherShield
-  shield.begin(7);
+  shield.begin(7, true);
 
   // TODO: can this be moved to WS::begin() ?
   // attach external interrupt pins to IRQ functions
@@ -35,8 +35,9 @@ void setup() {
   // turn on interrupts
   interrupts();
 
-  pinMode(D7, OUTPUT);
-  digitalWrite(D7, LOW);
+  // OnBoard LED
+  // pinMode(D7, OUTPUT);
+  // digitalWrite(D7, LOW);
 }
 //---------------------------------------------------------------
 void loop() {
@@ -44,7 +45,7 @@ void loop() {
 
   // Publishes every UPDATE_INTERVAL seconds
   if (millis() - lastPublish > UPDATE_INTERVAL * 1000) {
-    digitalWrite(D7, HIGH);
+    // digitalWrite(D7, HIGH);
 
     // Get Weather
     WeatherData *data = shield.getWeather();
@@ -64,17 +65,22 @@ void loop() {
       uptime /= 60;
       uptimeUnit = 'h';
     }
+    // uptime - days
+    if (uptimeUnit == 'h' && uptime >= 24) {
+      uptime /= 24;
+      uptimeUnit = 'd';
+    }
 
     // Choose which values you actually want to publish- remember, if you're
     // publishing more than once per second on average, you'll be throttled!
-    // Particle.publish("humidity", String(humidity));
+    // Particle.publish("tempF", String(data->tempF));
 
     // Send data to Blynk App
     Blynk.virtualWrite(1, data->tempF);
     Blynk.virtualWrite(2, data->humidity);
     Blynk.virtualWrite(3, data->pressurePa);
-    Blynk.virtualWrite(4, data->baroTempF);
-    Blynk.virtualWrite(5, data->altFeet);
+    // Blynk.virtualWrite(4, data->baroTempF);
+    // Blynk.virtualWrite(5, data->altFeet);
     Blynk.virtualWrite(
         6, WeatherShield::windDirToCompasPoint(data->windDirection));
     Blynk.virtualWrite(7, data->windSpeedMPH);
@@ -87,6 +93,6 @@ void loop() {
 
     Blynk.virtualWrite(11, data->rainPerHour);
 
-    digitalWrite(D7, LOW);
+    // digitalWrite(D7, LOW);
   }
 }
