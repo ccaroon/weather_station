@@ -1,5 +1,7 @@
+#include "MoonPhase.h"
 #include "WeatherShield.h"
 #include "blynk.h"
+#include <math.h>
 
 #define UPDATE_INTERVAL 5 // in seconds
 
@@ -35,6 +37,7 @@ void setup() {
   // turn on interrupts
   interrupts();
 
+  Time.zone(-4);
   // OnBoard LED
   // pinMode(D7, OUTPUT);
   // digitalWrite(D7, LOW);
@@ -92,6 +95,12 @@ void loop() {
     Blynk.virtualWrite(10, uptimeString);
 
     Blynk.virtualWrite(11, data->rainPerHour);
+
+    // year, month, day, hour
+    double phase = MoonPhase::moon_phase(Time.year(), Time.month(), Time.day(),
+                                         Time.hour());
+    phase = floor(phase * 1000 + 0.5) / 10;
+    Blynk.virtualWrite(12, phase);
 
     // digitalWrite(D7, LOW);
   }
