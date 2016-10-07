@@ -49,6 +49,8 @@ void loop() {
   // Publishes every UPDATE_INTERVAL seconds
   if (millis() - lastPublish > UPDATE_INTERVAL * 1000) {
     // digitalWrite(D7, HIGH);
+    // Turn on Virtual LED
+    Blynk.virtualWrite(25, 255);
 
     // Get Weather
     WeatherData *data = shield.getWeather();
@@ -102,6 +104,13 @@ void loop() {
     phase = floor(phase * 1000 + 0.5) / 10;
     Blynk.virtualWrite(12, phase);
 
+    Blynk.virtualWrite(14, data->rainPerDay);
+
+    Blynk.virtualWrite(15, Time.hour());
+    Blynk.virtualWrite(16, Time.minute());
+
     // digitalWrite(D7, LOW);
+    // Turn off Virtual LED
+    Blynk.virtualWrite(25, 0);
   }
 }

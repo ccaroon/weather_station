@@ -85,112 +85,112 @@
 #define RAIN_PER_DUMP 0.011
 
 struct WeatherData {
-  // Temp, Humidity, etc.
-  double humidity = 0.0;
-  double tempF = 0.0;
-  double pressurePa = 0.0;
-  double baroTempF = 0.0;
-  float altFeet = 0.0;
+    // Temp, Humidity, etc.
+    double humidity = 0.0;
+    double tempF = 0.0;
+    double pressurePa = 0.0;
+    double baroTempF = 0.0;
+    float altFeet = 0.0;
 
-  // Wind
-  int windDirection = 0;            // 0-360 instantaneous wind direction
-  float windSpeedMPH = 0.0;         // MPH instantaneous wind speed
-  float windSpeedAvg = 0.0;         // Average wind speed over 100 measurements
-  float windSpeedMeasurements[100]; // Last 100 wind speed measurements
-  float windSpeedMax = 0.0;         // Max wind speed per minute
+    // Wind
+    int windDirection = 0;    // 0-360 instantaneous wind direction
+    float windSpeedMPH = 0.0; // MPH instantaneous wind speed
+    float windSpeedAvg = 0.0; // Average wind speed over 100 measurements
+    float windSpeedMeasurements[100]; // Last 100 wind speed measurements
+    float windSpeedMax = 0.0;         // Max wind speed per minute
 
-  // Rain
-  float rainByMinute[60];
-  float rainPerHour = 0.0;
-  float rainPerDay = 0.0;
+    // Rain
+    float rainByMinute[60];
+    float rainPerHour = 0.0;
+    float rainPerDay = 0.0;
 };
 
 class WeatherShield {
-public:
-  // Constructor
-  WeatherShield();
+  public:
+    // Constructor
+    WeatherShield();
 
-  void begin(byte, bool);
-  void update();
+    void begin(byte, bool);
+    void update();
 
-  // Si7021 & HTU21D Public Functions
-  float getRH();
-  float readTemp();
-  float getTemp();
-  float readTempF();
-  float getTempF();
-  void heaterOn();
-  void heaterOff();
-  void changeResolution(uint8_t i);
-  void reset();
-  uint8_t checkID();
+    // Si7021 & HTU21D Public Functions
+    float getRH();
+    float readTemp();
+    float getTemp();
+    float readTempF();
+    float getTempF();
+    void heaterOn();
+    void heaterOff();
+    void changeResolution(uint8_t i);
+    void reset();
+    uint8_t checkID();
 
-  // MPL3115A2 Public Functions
-  // Returns float with meters above sealevel. Ex: 1638.94
-  float readAltitude();
-  // Returns float with feet above sealevel. Ex: 5376.68
-  float readAltitudeFt();
-  // Returns float with barometric pressure in Pa. Ex: 83351.25
-  float readPressure();
-  // Returns float with current temperature in Celsius. Ex: 23.37
-  float readBaroTemp();
-  // Returns float with current temperature in Fahrenheit. Ex: 73.96
-  float readBaroTempF();
-  // Puts the sensor into Pascal measurement mode.
-  void setModeBarometer();
-  // Puts the sensor into altimetery mode.
-  void setModeAltimeter();
-  // Puts the sensor into Standby mode. Required when changing CTRL1 register.
-  void setModeStandby();
-  // Start taking measurements!
-  void setModeActive();
-  // Sets the # of samples from 1 to 128. See datasheet.
-  void setOversampleRate(byte);
-  // Sets the fundamental event flags. Required during setup.
-  void enableEventFlags();
+    // MPL3115A2 Public Functions
+    // Returns float with meters above sealevel. Ex: 1638.94
+    float readAltitude();
+    // Returns float with feet above sealevel. Ex: 5376.68
+    float readAltitudeFt();
+    // Returns float with barometric pressure in Pa. Ex: 83351.25
+    float readPressure();
+    // Returns float with current temperature in Celsius. Ex: 23.37
+    float readBaroTemp();
+    // Returns float with current temperature in Fahrenheit. Ex: 73.96
+    float readBaroTempF();
+    // Puts the sensor into Pascal measurement mode.
+    void setModeBarometer();
+    // Puts the sensor into altimetery mode.
+    void setModeAltimeter();
+    // Puts the sensor into Standby mode. Required when changing CTRL1 register.
+    void setModeStandby();
+    // Start taking measurements!
+    void setModeActive();
+    // Sets the # of samples from 1 to 128. See datasheet.
+    void setOversampleRate(byte);
+    // Sets the fundamental event flags. Required during setup.
+    void enableEventFlags();
 
-  void readBarometer();
-  void readAltimeter();
+    void readBarometer();
+    void readAltimeter();
 
-  // Wind
-  void windSpeedIRQ();
-  int getWindDirection();
-  float getWindSpeed();
-  static char *windDirToCompasPoint(int);
+    // Wind
+    void windSpeedIRQ();
+    int getWindDirection();
+    float getWindSpeed();
+    static char *windDirToCompasPoint(int);
 
-  // Rain
-  float getRainPerMinute();
-  float getRainPerHour();
-  float getRainPerDay();
-  void rainIRQ();
+    // Rain
+    float getRainPerMinute();
+    float getRainPerHour();
+    float getRainPerDay();
+    void rainIRQ();
 
-  WeatherData *getWeather();
+    WeatherData *getWeather();
 
-private:
-  int updateInterval = 1; // in seconds
-  unsigned long seconds;
-  unsigned long minutes;
+  private:
+    int updateInterval = 1; // in seconds
+    unsigned long seconds;
+    unsigned long minutes;
 
-  // Wind Measurement Vars
-  long lastWindCheck = 0;
-  volatile long lastWindIRQ = 0;
-  volatile byte windClicks = 0;
+    // Wind Measurement Vars
+    long lastWindCheck = 0;
+    volatile long lastWindIRQ = 0;
+    volatile byte windClicks = 0;
 
-  // Rain Measurement Vars
-  volatile unsigned long rainLastMeasure;
+    // Rain Measurement Vars
+    volatile unsigned long rainLastMeasure;
 
-  WeatherData data;
+    WeatherData data;
 
-  void registerParticleVars();
+    void registerParticleVars();
 
-  uint16_t makeMeasurment(uint8_t command);
-  // Si7021 & HTU21D Private Functions
-  void writeReg(uint8_t value);
-  uint8_t readReg();
+    uint16_t makeMeasurment(uint8_t command);
+    // Si7021 & HTU21D Private Functions
+    void writeReg(uint8_t value);
+    uint8_t readReg();
 
-  // MPL3115A2 Private Functions
-  void toggleOneShot();
-  byte IICRead(byte regAddr);
-  void IICWrite(byte regAddr, byte value);
+    // MPL3115A2 Private Functions
+    void toggleOneShot();
+    byte IICRead(byte regAddr);
+    void IICWrite(byte regAddr, byte value);
 };
 #endif
