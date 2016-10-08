@@ -35,8 +35,10 @@ public:
         long        asLong() const      { return atol(ptr); }
 #ifndef BLYNK_NO_FLOAT
         double      asDouble() const    { return atof(ptr); }
+        float       asFloat() const     { return atof(ptr); }
 #endif
         bool isValid() const            { return ptr != NULL; }
+        bool isEmpty() const            { return *ptr == '\0'; }
 
         bool operator <  (const iterator& it) const { return ptr < it.ptr; }
         bool operator >= (const iterator& it) const { return ptr >= it.ptr; }
@@ -66,7 +68,9 @@ public:
     long        asLong() const      { return atol(buff); }
 #ifndef BLYNK_NO_FLOAT
     double      asDouble() const    { return atof(buff); }
+    float       asFloat() const     { return atof(buff); }
 #endif
+    bool isEmpty() const            { return *buff == '\0'; }
 
     iterator begin() const { return iterator(buff); }
     iterator end() const   { return iterator(buff+len); }
@@ -99,10 +103,23 @@ public:
         add(val);
     }
 
-private:
+protected:
     char*	buff;
     size_t	len;
     size_t	buff_size;
+};
+
+
+class BlynkParamAllocated
+	: public BlynkParam
+{
+public:
+	BlynkParamAllocated(size_t size)
+		: BlynkParam(malloc(size), 0, size)
+	{}
+	~BlynkParamAllocated() {
+		free(buff);
+	}
 };
 
 inline
@@ -152,7 +169,11 @@ void BlynkParam::add(const String& str)
 {
     size_t len = str.length()+1;
     char buff[len];
+#if defined(ARDUINO_AVR_DIGISPARK)
+    const_cast<String&>(str).toCharArray(buff, len);
+#else
     str.toCharArray(buff, len);
+#endif
     BlynkParam::add(buff, len);
 }
 
