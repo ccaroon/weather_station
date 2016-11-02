@@ -31,7 +31,7 @@ void setup() {
     Blynk.begin(auth);
 
     // Initialize the WeatherShield
-    shield.begin(false);
+    shield.begin(true);
 
     // attach external interrupt pins to IRQ functions
     attachInterrupt(RAIN, rainIRQ, FALLING);

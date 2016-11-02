@@ -26,7 +26,7 @@ void WeatherShield::begin(bool regParticleVars) {
 }
 
 void WeatherShield::registerParticleVars() {
-    Particle.variable("tempF", &data.tempF);
+    Particle.variable("tempF", data.tempF);
 }
 
 // TODO: use the RTC for this time related stuff

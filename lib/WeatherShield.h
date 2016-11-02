@@ -13,10 +13,12 @@
 #define RAIN D2
 #define RAIN_PER_DUMP 0.011
 
+// NOTE: Any data point that you want to use as a Particle Variable needs to be
+// INT, DOUBLE or STRING. "float" will not work.
 struct WeatherData {
     // Temperature, Humidity, etc.
     float humidity = 0.0;
-    float tempF = 0.0;
+    double tempF = 0.0;
     float pressurePa = 0.0;
 
     // Wind
