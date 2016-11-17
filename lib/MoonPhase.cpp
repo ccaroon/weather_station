@@ -24,7 +24,6 @@ double julian(int year, int month, double day) {
 /******************************************************************************/
 double sun_position(double j) {
     double n, x, e, l, dl, v;
-    double m2;
     int i;
 
     n = 360 / 365.2422 * j;
@@ -53,9 +52,7 @@ double sun_position(double j) {
 }
 /******************************************************************************/
 double moon_position(double j, double ls) {
-    double ms, l, mm, n, ev, sms, z, x, lm, bm, ae, ec;
-    double d;
-    double ds, as, dm;
+    double ms, l, mm, n, ev, sms, ae, ec;
     int i;
 
     ms = 0.985647332099 * j - 3.762863;

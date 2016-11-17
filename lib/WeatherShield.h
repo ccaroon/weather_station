@@ -30,8 +30,11 @@ struct WeatherData {
 
     // Rain
     float rainByMinute[60];
-    float rainPerHour = 0.0;
+    double rainPerHour = 0.0;
     float rainPerDay = 0.0;
+
+    // Moon
+    double moonIllumination = 0.0;
 };
 
 class WeatherShield {

@@ -97,8 +97,8 @@ void loop() {
         // year, month, day, hour
         double phase = MoonPhase::moon_phase(Time.year(), Time.month(),
                                              Time.day(), Time.hour());
-        phase = floor(phase * 1000 + 0.5) / 10;
-        Blynk.virtualWrite(12, phase);
+        data->moonIllumination = floor(phase * 1000 + 0.5) / 10;
+        Blynk.virtualWrite(12, data->moonIllumination);
 
         Blynk.virtualWrite(14, data->rainPerDay);
 

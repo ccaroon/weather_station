@@ -27,6 +27,8 @@ void WeatherShield::begin(bool regParticleVars) {
 
 void WeatherShield::registerParticleVars() {
     Particle.variable("tempF", data.tempF);
+    Particle.variable("rainPerHour", data.rainPerHour);
+    Particle.variable("moonIllume", data.moonIllumination);
 }
 
 // TODO: use the RTC for this time related stuff
