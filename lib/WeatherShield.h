@@ -17,9 +17,9 @@
 // INT, DOUBLE or STRING. "float" will not work.
 struct WeatherData {
     // Temperature, Humidity, etc.
-    float humidity = 0.0;
+    double humidity = 0.0;
     double tempF = 0.0;
-    float pressurePa = 0.0;
+    double pressurePa = 0.0;
 
     // Wind
     int windDirection = 0;    // 0-360 instantaneous wind direction
@@ -31,7 +31,7 @@ struct WeatherData {
     // Rain
     float rainByMinute[60];
     double rainPerHour = 0.0;
-    float rainPerDay = 0.0;
+    double rainPerDay = 0.0;
 
     // Moon
     double moonIllumination = 0.0;
