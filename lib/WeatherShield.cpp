@@ -20,6 +20,9 @@ void WeatherShield::begin(bool regParticleVars) {
     // input from rain gauge sensor
     pinMode(RAIN, INPUT_PULLUP);
 
+    this->currMinute = Time.minute();
+    this->currHour = Time.hour();
+
     if (regParticleVars) {
         registerParticleVars();
     }
@@ -32,30 +35,32 @@ void WeatherShield::registerParticleVars() {
     Particle.variable("rainPerDay", data.rainPerDay);
     Particle.variable("rainPerHour", data.rainPerHour);
     Particle.variable("tempF", data.tempF);
+    Particle.variable("windSpeedAvg", data.windSpeedAvg);
 }
 
-// TODO: use the RTC for this time related stuff
 void WeatherShield::update() {
-    seconds += updateInterval;
-    if (seconds > 59) {
-        seconds = 0;
 
-        if (++minutes > 59) {
-            minutes = 0;
-        }
+    // Process Time based resets
+    int newMin = Time.minute();
+    if (newMin != currMinute) {
+        data.rainByMinute[newMin] = 0.0;
+        currMinute = newMin;
+    }
 
-        // Zero out this minute's rainfall amount
-        data.rainByMinute[minutes] = 0;
+    int newHour = Time.hour();
+    if (newHour != currHour) {
         data.windSpeedMax = 0.0;
+        currHour = newHour;
     }
 
-    data.rainPerHour = 0;
-    for (int i = 0; i < 60; i++) {
-        data.rainPerHour += data.rainByMinute[i];
-    }
-
+    // Reset rainPerDay everyday at midnight'ish
     if (Time.hour() == 23 && Time.minute() == 59) {
         data.rainPerDay = 0.0;
+    }
+
+    data.rainPerHour = 0.0;
+    for (int i = 0; i < 60; i++) {
+        data.rainPerHour += data.rainByMinute[i];
     }
 }
 
@@ -77,12 +82,15 @@ WeatherData *WeatherShield::getWeather() {
     data.windSpeedMPH = getWindSpeed();
 
     // Avg Wind
-    data.windSpeedMeasurements[seconds] = data.windSpeedMPH;
+    data.windSpeedMeasurements[windSpeedMeasurementNum++] = data.windSpeedMPH;
+    if (windSpeedMeasurementNum >= NUM_WIND_SPEED_MEASUREMENTS) {
+        windSpeedMeasurementNum = 0;
+    }
 
-    for (byte i = 0; i < 100; i++) {
+    for (byte i = 0; i < NUM_WIND_SPEED_MEASUREMENTS; i++) {
         data.windSpeedAvg += data.windSpeedMeasurements[i];
     }
-    data.windSpeedAvg /= 100;
+    data.windSpeedAvg /= NUM_WIND_SPEED_MEASUREMENTS;
 
     // Max Wind
     if (data.windSpeedMPH > data.windSpeedMax) {
@@ -210,18 +218,20 @@ void WeatherShield::rainIRQ() {
         data.rainPerDay += RAIN_PER_DUMP;
 
         // Increase this minute's amount of rain
-        data.rainByMinute[minutes] += RAIN_PER_DUMP;
+        data.rainByMinute[currMinute] += RAIN_PER_DUMP;
 
         rainLastMeasure = now;
     }
 }
 
 float WeatherShield::getRainPerMinute() {
-    return data.rainByMinute[minutes];
+    return data.rainByMinute[currMinute];
 }
+
 float WeatherShield::getRainPerHour() {
     return data.rainPerHour;
 }
+
 float WeatherShield::getRainPerDay() {
     return data.rainPerDay;
 }
