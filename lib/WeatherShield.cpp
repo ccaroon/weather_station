@@ -133,8 +133,7 @@ char *WeatherShield::windDirToCompasPoint(int dir) {
 // input D3
 void WeatherShield::windSpeedIRQ() {
     // Ignore switch-bounce glitches less than 10ms (142MPH max reading) after
-    // the
-    // reed switch closes
+    // the reed switch closes
     if (millis() - lastWindIRQ > 10) {
         lastWindIRQ = millis(); // Grab the current time
         windClicks++;           // There is 1.492MPH for each click per second.
@@ -157,10 +156,9 @@ int WeatherShield::getWindDirection() {
     // datasheet for more information.
 
     // Wind Vains may vary in the values they return. To get exact wind
-    // direction,
-    // it is recomended that you AnalogRead the Wind Vain to make sure the
-    // values
-    // your wind vain output fall within the values listed below.
+    // direction, it is recomended that you AnalogRead the Wind Vain to make
+    // sure the values your wind vain output fall within the values listed
+    // below.
     if (adc > 2270 && adc < 2290)
         return (0); // North
     if (adc > 3220 && adc < 3299)
