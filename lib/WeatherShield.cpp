@@ -1,4 +1,5 @@
 #include "WeatherShield.h"
+#include <math.h>
 
 // Initialize
 WeatherShield::WeatherShield() {
@@ -29,6 +30,7 @@ void WeatherShield::begin(bool regParticleVars) {
 }
 
 void WeatherShield::registerParticleVars() {
+    // Note: variable names are limted to 12 chars in length
     Particle.variable("humidity", data.humidity);
     Particle.variable("moonIllume", data.moonIllumination);
     Particle.variable("pressurePa", data.pressurePa);
@@ -36,9 +38,42 @@ void WeatherShield::registerParticleVars() {
     Particle.variable("rainPerHour", data.rainPerHour);
     Particle.variable("tempF", data.tempF);
     Particle.variable("windSpeedAvg", data.windSpeedAvg);
+    Particle.variable("pressureDir", data.pressureDir);
+    Particle.variable("moonWaxWane", data.moonWaxWane);
 }
 
+// Housekeeping stuff
 void WeatherShield::update() {
+
+    // Historical type stuff
+    if (Time.now() - (15 * 60) > lastHistoricalDataCheck) {
+        lastHistoricalDataCheck = Time.now();
+
+        // Is the Moon Waning or Waxing
+        if (data.moonIllumination > data.lastMoonIllume) {
+            data.moonWaxWane = MOON_WAXING;
+        } else if (data.moonIllumination < data.lastMoonIllume) {
+            data.moonWaxWane = MOON_WANING;
+        }
+        data.lastMoonIllume = data.moonIllumination;
+
+        // Is the Pressure Falling or Rising
+        // Convert to InHg, round to 2 places(ish)
+        float currentP = data.pressurePa * 0.0002953;
+        currentP = roundf(currentP * 100.0) / 100.0;
+
+        float lastP = data.lastPressurePa * 0.0002953;
+        lastP = roundf(lastP * 100.0) / 100.0;
+
+        if (currentP > lastP) {
+            data.pressureDir = MERCURY_RISING;
+        } else if (currentP < lastP) {
+            data.pressureDir = MERCURY_FALLING;
+        } else if (currentP == lastP) {
+            data.pressureDir = MERCURY_STEADY;
+        }
+        data.lastPressurePa = data.pressurePa;
+    }
 
     // Process Time based resets
     int newMin = Time.minute();

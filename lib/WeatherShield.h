@@ -15,13 +15,26 @@
 
 #define NUM_WIND_SPEED_MEASUREMENTS 120
 
+#define MERCURY_FALLING -1
+#define MERCURY_STEADY 0
+#define MERCURY_RISING 1
+
+#define MOON_UNKNOWN -1
+#define MOON_WANING 0
+#define MOON_WAXING 1
+
+// -----------------------------------------------------------------------------
 // NOTE: Any data point that you want to use as a Particle Variable needs to be
 // INT, DOUBLE or STRING. "float" will not work.
+// -----------------------------------------------------------------------------
 struct WeatherData {
     // Temperature, Humidity, etc.
     double humidity = 0.0;
     double tempF = 0.0;
+
+    double lastPressurePa = 0.0;
     double pressurePa = 0.0;
+    int pressureDir = MERCURY_STEADY;
 
     // Wind
     // 0-360 instantaneous wind direction
@@ -44,7 +57,9 @@ struct WeatherData {
     double rainPerDay = 0.0;
 
     // Moon
+    double lastMoonIllume = 0.0;
     double moonIllumination = 0.0;
+    int moonWaxWane = MOON_UNKNOWN;
 };
 
 class WeatherShield {
@@ -84,6 +99,9 @@ class WeatherShield {
 
     // Rain Measurement Vars
     volatile unsigned long rainLastMeasure;
+
+    // Misc
+    long lastHistoricalDataCheck = 0;
 
     WeatherData data;
 
