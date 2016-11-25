@@ -144,25 +144,25 @@ char *WeatherShield::windDirToCompasPoint(int dir) {
     case 0:
         cp = "N";
         break;
-    case 1:
+    case 45:
         cp = "NE";
         break;
-    case 2:
+    case 90:
         cp = "E";
         break;
-    case 3:
+    case 135:
         cp = "SE";
         break;
-    case 4:
+    case 180:
         cp = "S";
         break;
-    case 5:
+    case 225:
         cp = "SW";
         break;
-    case 6:
+    case 270:
         cp = "W";
         break;
-    case 7:
+    case 315:
         cp = "NW";
         break;
     default:
@@ -184,43 +184,51 @@ void WeatherShield::windSpeedIRQ() {
 }
 
 //---------------------------------------------------------------
-// Read the wind direction sensor, return heading in degrees
+// Read the wind direction sensor
+// Currently only support 8 compass directions
 int WeatherShield::getWindDirection() {
-    unsigned int adc;
+    unsigned int analogRaw;
 
     // get the current reading from the sensor
-    adc = analogRead(WIND_DIR);
+    analogRaw = analogRead(WIND_DIR);
 
-    // The following table is ADC readings for the wind direction sensor output,
-    // sorted from low to high.
-    // Each threshold is the midpoint between adjacent headings. The output is
-    // degrees for that ADC reading.
-    // Note that these are not in compass degree order! See Weather Meters
-    // datasheet for more information.
-
-    // Wind Vains may vary in the values they return. To get exact wind
-    // direction, it is recomended that you AnalogRead the Wind Vain to make
-    // sure the values your wind vain output fall within the values listed
-    // below.
-    if (adc > 2270 && adc < 2290)
+    if (analogRaw >= 3570 && analogRaw < 3700)
         return (0); // North
-    if (adc > 3220 && adc < 3299)
-        return (1); // NE
-    if (adc > 3890 && adc < 3999)
-        return (2); // East
-    if (adc > 3780 && adc < 3850)
-        return (3); // SE
+    if (analogRaw >= 2750 && analogRaw < 2850)
+        return (45); // NE
+    if (analogRaw >= 1580 && analogRaw < 1650)
+        return (90); // East
+    if (analogRaw >= 1900 && analogRaw < 2000)
+        return (135); // SE
+    if (analogRaw >= 2200 && analogRaw < 2400)
+        return (180); // South
+    if (analogRaw >= 3200 && analogRaw < 3299)
+        return (225); // SW
+    if (analogRaw >= 3890 && analogRaw < 3999)
+        return (270); // West
+    if (analogRaw >= 3780 && analogRaw < 3890)
+        return (315); // NW
 
-    if (adc > 3570 && adc < 3650)
-        return (4); // South
-    if (adc > 2790 && adc < 2850)
-        return (5); // SW
-    if (adc > 1580 && adc < 1610)
-        return (6); // West
-    if (adc > 1930 && adc < 1950)
-        return (7); // NW
+    // if (analogRaw >= 2100 && analogRaw < 2200)
+    //   return (3.53); // SSW
+    // if (analogRaw >= 3100 && analogRaw < 3200)
+    //   return (4.32); // WSW
+    // if (analogRaw >= 3700 && analogRaw < 3780)
+    //   return (5.11); // WNW
+    // if (analogRaw >= 3400 && analogRaw < 3500)
+    //   return (5.89); // NNW
+    // if (analogRaw >= 2600 && analogRaw < 2700)
+    //   return (0.39); // NNE
+    // if (analogRaw >= 1510 && analogRaw < 1580)
+    //   return (1.18); // ENE
+    // if (analogRaw >= 1470 && analogRaw < 1510)
+    //   return (1.96); // ESE
+    // if (analogRaw >= 1700 && analogRaw < 1750)
+    //   return (2.74); // SSE
 
-    return (-1); // error, disconnected?
+    // Bad Reading
+    if (analogRaw > 4000)
+        return (-1);
 }
 
 //---------------------------------------------------------------
