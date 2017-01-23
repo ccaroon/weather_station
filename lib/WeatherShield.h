@@ -3,8 +3,8 @@
 #ifndef WeatherShield_h
 #define WeatherShield_h
 
-#include "SparkFunHTU21D.h"
-#include "SparkFunMPL3115A2.h"
+#include "HTU21D.h"
+#include "SparkFun_MPL3115A2.h"
 
 // Wind and Rain
 #define WIND_DIR A0
