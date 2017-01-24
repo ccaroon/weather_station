@@ -84,17 +84,16 @@ void loop() {
         Blynk.virtualWrite(2, data->humidity);
         Blynk.virtualWrite(3, data->pressurePa);
         // Pressure in Inches of Mercury
-        const char *arrow;
-        if (data->pressureDir == MERCURY_FALLING) {
-            arrow = "↓";
-        } else if (data->pressureDir == MERCURY_RISING) {
-            arrow = "↑";
-        } else if (data->pressureDir == MERCURY_STEADY) {
-            arrow = "⇕";
-            // arrow = "↕";
-        }
-        String pressure =
-            String::format("%0.2f%s", data->pressurePa * 0.0002953, arrow);
+        // const char *arrow;
+        // if (data->pressureDir == MERCURY_FALLING) {
+        //     arrow = "↓";
+        // } else if (data->pressureDir == MERCURY_RISING) {
+        //     arrow = "↑";
+        // } else if (data->pressureDir == MERCURY_STEADY) {
+        //     arrow = "⇕";
+        //     // arrow = "↕";
+        // }
+        String pressure = String::format("%0.2f", data->pressurePa * 0.0002953);
         Blynk.virtualWrite(4, pressure);
 
         Blynk.virtualWrite(
