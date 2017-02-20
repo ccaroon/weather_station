@@ -40,7 +40,7 @@ void setup() {
     // turn on interrupts
     interrupts();
 
-    Time.zone(-4);
+    Time.zone(-5);
     startUpTime = Time.now();
 }
 
@@ -114,6 +114,8 @@ void loop() {
         Blynk.virtualWrite(12, data->moonIllumination);
 
         Blynk.virtualWrite(14, data->rainPerDay);
+
+        Blynk.virtualWrite(20, Time.timeStr());
 
         // Turn off Virtual LED
         Blynk.virtualWrite(25, 0);
