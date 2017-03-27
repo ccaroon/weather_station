@@ -27,11 +27,11 @@ void rainIRQ() {
 
 //------------------------------------------------------------------------------
 void setup() {
-    delay(5000);
-    Blynk.begin(auth);
-
     // Initialize the WeatherShield
     shield.begin(true);
+
+    delay(5000);
+    Blynk.begin(auth);
 
     // attach external interrupt pins to IRQ functions
     attachInterrupt(RAIN, rainIRQ, FALLING);
