@@ -106,6 +106,9 @@ WeatherData *WeatherShield::getWeather() {
 
     // Temperature from HTU21D (Fahrenheit)
     data.tempF = (htu21d.readTemperature() * 1.8) + 32.0;
+    // Adjust temperature down by 5 degrees to compensate for sensor housing
+    // that is currently causing it to be higher than actual.
+    data.tempF -= 5.0;
 
     // Pressure from MPL3115A2 (Pascals)
     data.pressurePa = mpl3115a2.readPressure();
