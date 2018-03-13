@@ -31,6 +31,8 @@ struct WeatherData {
     // Temperature, Humidity, etc.
     double humidity = 0.0;
     double tempF = 0.0;
+    double tempFDailyLow = 999.0;
+    double tempFDailyHigh = 0.0;
 
     double lastPressurePa = 0.0;
     double pressurePa = 0.0;

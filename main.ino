@@ -83,17 +83,7 @@ void loop() {
         Blynk.virtualWrite(1, data->tempF);
         Blynk.virtualWrite(2, data->humidity);
         Blynk.virtualWrite(3, data->pressurePa);
-        // Pressure in Inches of Mercury
-        if (data->pressureDir == MERCURY_FALLING) {
-            Blynk.virtualWrite(15, 0);
-            Blynk.virtualWrite(16, 255);
-        } else if (data->pressureDir == MERCURY_RISING) {
-            Blynk.virtualWrite(15, 255);
-            Blynk.virtualWrite(16, 0);
-        } else if (data->pressureDir == MERCURY_STEADY) {
-            Blynk.virtualWrite(15, 255);
-            Blynk.virtualWrite(16, 255);
-        }
+
         String pressure = String::format("%0.2f", data->pressurePa * 0.0002953);
         Blynk.virtualWrite(4, pressure);
 
@@ -114,6 +104,21 @@ void loop() {
         Blynk.virtualWrite(12, data->moonIllumination);
 
         Blynk.virtualWrite(14, data->rainPerDay);
+
+        // Pressure in Inches of Mercury
+        if (data->pressureDir == MERCURY_FALLING) {
+            Blynk.virtualWrite(15, 0);
+            Blynk.virtualWrite(16, 255);
+        } else if (data->pressureDir == MERCURY_RISING) {
+            Blynk.virtualWrite(15, 255);
+            Blynk.virtualWrite(16, 0);
+        } else if (data->pressureDir == MERCURY_STEADY) {
+            Blynk.virtualWrite(15, 255);
+            Blynk.virtualWrite(16, 255);
+        }
+
+        Blynk.virtualWrite(17, data->tempFDailyLow);
+        Blynk.virtualWrite(18, data->tempFDailyHigh);
 
         Blynk.virtualWrite(20, Time.timeStr());
 

@@ -37,6 +37,8 @@ void WeatherShield::registerParticleVars() {
     Particle.variable("rainPerDay", data.rainPerDay);
     Particle.variable("rainPerHour", data.rainPerHour);
     Particle.variable("tempF", data.tempF);
+    Particle.variable("tempFDailyL", data.tempFDailyLow);
+    Particle.variable("tempFDailyH", data.tempFDailyHigh);
     Particle.variable("windSpeedAvg", data.windSpeedAvg);
     Particle.variable("pressureDir", data.pressureDir);
     Particle.variable("moonWaxWane", data.moonWaxWane);
@@ -73,6 +75,15 @@ void WeatherShield::update() {
             data.pressureDir = MERCURY_STEADY;
         }
         data.lastPressurePa = data.pressurePa;
+
+        // Daily Temperature High & Low
+        if (data.tempF > data.tempFDailyHigh) {
+            data.tempFDailyHigh = data.tempF;
+        }
+
+        if (data.tempF < data.tempFDailyLow) {
+            data.tempFDailyLow = data.tempF;
+        }
     }
 
     // Process Time based resets
@@ -88,9 +99,11 @@ void WeatherShield::update() {
         currHour = newHour;
     }
 
-    // Reset rainPerDay everyday at midnight'ish
+    // Reset per day vars everyday at midnight'ish
     if (Time.hour() == 23 && Time.minute() == 59) {
         data.rainPerDay = 0.0;
+        data.tempFDailyLow = 999.0;
+        data.tempFDailyHigh = 0.0;
     }
 
     data.rainPerHour = 0.0;
@@ -106,9 +119,6 @@ WeatherData *WeatherShield::getWeather() {
 
     // Temperature from HTU21D (Fahrenheit)
     data.tempF = (htu21d.readTemperature() * 1.8) + 32.0;
-    // Adjust temperature down by 5 degrees to compensate for sensor housing
-    // that is currently causing it to be higher than actual.
-    data.tempF -= 5.0;
 
     // Pressure from MPL3115A2 (Pascals)
     data.pressurePa = mpl3115a2.readPressure();
